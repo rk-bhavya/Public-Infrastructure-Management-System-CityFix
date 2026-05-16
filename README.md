@@ -9,25 +9,25 @@ The project implements a hierarchical role-based management system
 
 🛠️ Technologies Used
 
-🎨 Frontend
+🎨 Frontend |
 
   ⚛️ React.js
   🌐 Context API
   🎨 CSS / Inline Styling
 
   
-⚙️ Backend
+⚙️ Backend |
 
   🟢 Node.js
   🚂 Express.js
 
   
-🗄️ Database
+🗄️ Database |
 
   🍃 MongoDB Atlas
 
   
-🔑 Authentication
+🔑 Authentication |
 
   🔐 JWT Authentication
   🔒 bcryptjs
