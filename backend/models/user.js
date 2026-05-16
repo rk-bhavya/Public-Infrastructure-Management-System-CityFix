@@ -10,19 +10,22 @@ const userSchema = new mongoose.Schema(
     address: { type: String },
     role: {
       type: String,
-      enum: ["citizen", "staff", "admin"],
+      enum: ["citizen", "staff", "dept_admin", "admin"],
       default: "citizen",
     },
+    department: {
+   type: mongoose.Schema.Types.ObjectId,
+   ref: "Department",
+  },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 
 // Compare password

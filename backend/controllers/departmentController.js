@@ -1,36 +1,44 @@
 const Department = require("../models/department");
 
-exports.createDepartment = async (req, res, next) => {
+exports.createDepartment = async (req, res) => {
   try {
     const dept = await Department.create(req.body);
     res.status(201).json({ success: true, dept });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
-exports.getDepartments = async (req, res, next) => {
+exports.getDepartments = async (req, res) => {
   try {
     const departments = await Department.find({ isActive: true }).populate("head", "name email");
     res.json({ success: true, departments });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
-exports.updateDepartment = async (req, res, next) => {
+exports.updateDepartment = async (req, res) => {
   try {
     const dept = await Department.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!dept) return res.status(404).json({ message: "Department not found" });
     res.json({ success: true, dept });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
-exports.deleteDepartment = async (req, res, next) => {
+exports.deleteDepartment = async (req, res) => {
   try {
     await Department.findByIdAndUpdate(req.params.id, { isActive: false });
     res.json({ success: true, message: "Department deactivated" });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // Soft delete — marks as inactive, keeps data
-exports.deleteDepartment = async (req, res, next) => {
+exports.deleteDepartment = async (req, res) => {
   try {
     const dept = await Department.findById(req.params.id);
     if (!dept) return res.status(404).json({ message: "Department not found" });
@@ -50,11 +58,13 @@ exports.deleteDepartment = async (req, res, next) => {
 
     await Department.findByIdAndUpdate(req.params.id, { isActive: false });
     res.json({ success: true, message: "Department deactivated successfully" });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // Hard delete — permanently removes department (use with caution)
-exports.hardDeleteDepartment = async (req, res, next) => {
+exports.hardDeleteDepartment = async (req, res) => {
   try {
     const dept = await Department.findById(req.params.id);
     if (!dept) return res.status(404).json({ message: "Department not found" });
@@ -67,5 +77,7 @@ exports.hardDeleteDepartment = async (req, res, next) => {
 
     await dept.deleteOne();
     res.json({ success: true, message: "Department permanently deleted, complaints moved back to pending" });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };

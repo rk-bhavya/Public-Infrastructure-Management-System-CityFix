@@ -1,8 +1,9 @@
 const User = require("../models/user");
 const Complaint = require("../models/complaint");
+const Department = require("../models/department");
 
 // Dashboard stats
-exports.getDashboardStats = async (req, res, next) => {
+exports.getDashboardStats = async (req, res) => {
   try {
     const [
       totalComplaints, pending, assigned, inProgress,
@@ -28,19 +29,25 @@ exports.getDashboardStats = async (req, res, next) => {
       stats: { totalComplaints, pending, assigned, inProgress, resolved, rejected, totalUsers, totalStaff },
       categoryStats,
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // Get all users
-exports.getAllUsers = async (req, res, next) => {
+exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password").sort({ createdAt: -1 });
+    const users = await User.find()
+  .populate("department", "name")
+  .select("-password").sort({ createdAt: -1 });
     res.json({ success: true, users });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // Update user role
-exports.updateUserRole = async (req, res, next) => {
+exports.updateUserRole = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -49,20 +56,24 @@ exports.updateUserRole = async (req, res, next) => {
     ).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json({ success: true, user });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // Toggle user active status
-exports.toggleUserStatus = async (req, res, next) => {
+exports.toggleUserStatus = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
     user.isActive = !user.isActive;
     await user.save();
     res.json({ success: true, message: `User ${user.isActive ? "activated" : "deactivated"}` });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
-exports.deleteUser = async (req, res, next) => {
+exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -80,11 +91,13 @@ exports.deleteUser = async (req, res, next) => {
     user.isActive = false;
     await user.save();
     res.json({ success: true, message: `User ${user.name} has been deactivated` });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // Hard delete user — permanently removes user and their complaints
-exports.hardDeleteUser = async (req, res, next) => {
+exports.hardDeleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -102,5 +115,49 @@ exports.hardDeleteUser = async (req, res, next) => {
 
     await user.deleteOne();
     res.json({ success: true, message: `User and all their complaints permanently deleted` });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
+};
+
+exports.createDeptAdmin = async (req,res)=>{
+try{
+
+const {name,email,password,phone,departmentId} = req.body;
+
+const existingUser = await User.findOne({email});
+
+if(existingUser){
+return res.status(400).json({
+message:"Email already exists"
+});
+}
+
+const department = await Department.findById(departmentId);
+
+if(!department){
+return res.status(404).json({
+message:"Department not found"
+});
+}
+
+const user = await User.create({
+name,
+email,
+password,
+phone,
+role:"dept_admin",
+department:departmentId
+});
+
+res.status(201).json({
+success:true,
+user
+});
+
+}catch(err){
+res.status(500).json({
+message:err.message
+});
+}
 };

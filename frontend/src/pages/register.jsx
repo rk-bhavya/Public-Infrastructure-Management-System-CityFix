@@ -26,7 +26,7 @@ export default function Register({ onLogin }) {
         </div>
         {error && <div style={s.error}>{error}</div>}
         <div style={s.grid}>
-          {[["name","Full Name","text","Ravi Kumar"],["email","Email","email","ravi@gmail.com"],["password","Password","password","Min. 6 chars"],["phone","Phone","tel","9876543210"]].map(([k,l,t,p])=>(
+          {[["name","Full Name","text","fname lname"],["email","Email","email","you@gmail.com"],["password","Password","password","Min. 6 chars"],["phone","Phone","tel","10 digit no"]].map(([k,l,t,p])=>(
             <div key={k} style={s.field}>
               <label style={s.label}>{l}</label>
               <input style={s.input} type={t} placeholder={p} value={form[k]} onChange={set(k)} />

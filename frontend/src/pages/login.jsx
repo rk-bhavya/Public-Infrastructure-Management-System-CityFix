@@ -23,9 +23,9 @@ export default function Login({ onRegister }) {
         <div style={s.leftInner}>
           <div style={s.badge}>MUNICIPAL SERVICES</div>
           <h1 style={s.hero}>City<span style={s.heroAccent}>Fix</span></h1>
-          <p style={s.tagline}>Empowering citizens to build<br/>a better city — one complaint<br/>at a time.</p>
+          <p style={s.tagline}>A Public Infrastructure Management System</p>
           <div style={s.statsRow}>
-            {[["12K+","Complaints Resolved"],["98%","Response Rate"],["24h","Avg. Resolution"]].map(([n,l])=>(
+            {[["Report your issues"],["Resolve & review complaints"],["Receive faster response"]].map(([n,l])=>(
               <div key={l} style={s.stat}>
                 <span style={s.statNum}>{n}</span>
                 <span style={s.statLabel}>{l}</span>
@@ -39,8 +39,8 @@ export default function Login({ onRegister }) {
         <div style={s.card}>
           <div style={s.cardTop}>
             <div style={{fontSize:"48px",marginBottom:"12px"}}>🏛️</div>
-            <h2 style={s.cardTitle}>Welcome Back</h2>
-            <p style={s.cardSub}>Sign in to your citizen portal</p>
+            <h2 style={s.cardTitle}>Welcome</h2>
+            <p style={s.cardSub}>Sign in to the citizen portal</p>
           </div>
           {error && <div style={s.error}>{error}</div>}
           {[["email","Email Address","email","you@example.com"],["password","Password","password","••••••••"]].map(([k,l,t,p])=>(
@@ -56,7 +56,7 @@ export default function Login({ onRegister }) {
           </button>
           <div style={s.divider}><span style={s.dividerText}>or</span></div>
           <button style={s.btnOutline} onClick={onRegister}>Create New Account</button>
-          <p style={s.hint}>Admin? Use your assigned credentials.</p>
+          <p style={s.hint}>Use your credentials to report a public issue.</p>
         </div>
       </div>
     </div>

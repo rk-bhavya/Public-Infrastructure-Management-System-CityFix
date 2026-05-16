@@ -78,12 +78,10 @@ const complaintSchema = new mongoose.Schema(
 );
 
 // Auto-generate complaint ID before saving
-complaintSchema.pre("save", async function (next) {
+complaintSchema.pre("save", async function () {
   if (!this.complaintId) {
     const count = await mongoose.model("Complaint").countDocuments();
     this.complaintId = `MCC-${String(count + 1).padStart(6, "0")}`;
   }
-  next();
 });
-
 module.exports = mongoose.model("Complaint", complaintSchema);

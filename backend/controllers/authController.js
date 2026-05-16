@@ -5,7 +5,7 @@ const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
 
 // @POST /api/auth/register
-exports.register = async (req, res, next) => {
+exports.register = async (req, res) => {
   try {
     const { name, email, password, phone, address } = req.body;
     const existing = await User.findOne({ email });
@@ -17,11 +17,13 @@ exports.register = async (req, res, next) => {
       token: generateToken(user._id),
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @POST /api/auth/login
-exports.login = async (req, res, next) => {
+exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
@@ -39,7 +41,9 @@ exports.login = async (req, res, next) => {
       token: generateToken(user._id),
       user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @GET /api/auth/me
@@ -48,7 +52,7 @@ exports.getMe = async (req, res) => {
 };
 
 // @PUT /api/auth/updateprofile
-exports.updateProfile = async (req, res, next) => {
+exports.updateProfile = async (req, res) => {
   try {
     const { name, phone, address } = req.body;
     const user = await User.findByIdAndUpdate(
@@ -57,5 +61,7 @@ exports.updateProfile = async (req, res, next) => {
       { new: true, runValidators: true }
     ).select("-password");
     res.json({ success: true, user });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };

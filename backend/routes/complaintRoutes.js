@@ -21,7 +21,11 @@ router.route("/:id")
   .get(protect, getComplaintById)
   .delete(protect, authorize("citizen"), deleteComplaint);
 
-router.put("/:id/status", protect, authorize("staff", "admin"), updateStatus);
+router.put("/:id/status",
+protect,
+authorize("staff","admin","dept_admin"),
+updateStatus
+);
 router.put("/:id/assign", protect, authorize("admin"), assignComplaint);
 router.post("/:id/feedback", protect, authorize("citizen"), submitFeedback);
 router.delete("/admin/:id", protect, authorize("admin"), adminDeleteComplaint);

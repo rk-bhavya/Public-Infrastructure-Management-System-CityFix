@@ -118,7 +118,10 @@ export default function ComplaintDetail({ complaintId, onBack }) {
     </div>
   );
 
-  const isAdmin = user?.role === "admin" || user?.role === "staff";
+  const isAdmin =
+  user?.role === "admin" ||
+  user?.role === "staff" ||
+  user?.role === "dept_admin";
   const isCitizen = user?.role === "citizen";
 
   return (
@@ -292,66 +295,103 @@ export default function ComplaintDetail({ complaintId, onBack }) {
               <div style={s.actCard}>
                 <h3 style={s.iTitle}>⚡ Admin Actions</h3>
 
-                {/* Update Status */}
-                <button style={s.toggle} onClick={() => setPanel(panel === "status" ? null : "status")}>
-                  {panel === "status" ? "▼" : "►"} Update Status
-                </button>
-                {panel === "status" && (
-                  <div style={s.panelBox}>
-                    <select
-                      style={s.select}
-                      value={statusForm.status}
-                      onChange={e => setStatusForm({ ...statusForm, status: e.target.value })}
-                    >
-                      <option value="">Select status...</option>
-                      {STATUSES.map(st => <option key={st} value={st}>{st}</option>)}
-                    </select>
-                    <textarea
-                      style={s.textarea}
-                      rows={2}
-                      placeholder="Add a comment..."
-                      value={statusForm.comment}
-                      onChange={e => setStatusForm({ ...statusForm, comment: e.target.value })}
-                    />
-                    <button
-                      style={s.actionBtn}
-                      onClick={updateStatus}
-                      disabled={!statusForm.status || updating}
-                    >
-                      {updating ? "Updating..." : "Update Status"}
-                    </button>
-                  </div>
-                )}
+                {user?.role==="dept_admin" && (
+<>
+  {/* Update Status */}
+  <button
+    style={s.toggle}
+    onClick={() => setPanel(panel === "status" ? null : "status")}
+  >
+    {panel === "status" ? "▼" : "►"} Update Status
+  </button>
+
+  {panel === "status" && (
+    <div style={s.panelBox}>
+      <select
+        style={s.select}
+        value={statusForm.status}
+        onChange={e =>
+          setStatusForm({
+            ...statusForm,
+            status: e.target.value
+          })
+        }
+      >
+        <option value="">Select status...</option>
+        {STATUSES.map(st => (
+          <option key={st} value={st}>
+            {st}
+          </option>
+        ))}
+      </select>
+
+      <textarea
+        style={s.textarea}
+        rows={2}
+        placeholder="Add a comment..."
+        value={statusForm.comment}
+        onChange={e =>
+          setStatusForm({
+            ...statusForm,
+            comment: e.target.value
+          })
+        }
+      />
+
+      <button
+        style={s.actionBtn}
+        onClick={updateStatus}
+        disabled={!statusForm.status || updating}
+      >
+        {updating ? "Updating..." : "Update Status"}
+      </button>
+
+    </div>
+  )}
+</>
+)}
 
                 {/* Assign Department */}
-                <button style={s.toggle} onClick={() => setPanel(panel === "assign" ? null : "assign")}>
-                  {panel === "assign" ? "▼" : "►"} Assign Department
-                </button>
-                {panel === "assign" && (
-                  <div style={s.panelBox}>
-                    <select
-                      style={s.select}
-                      value={assignForm.departmentId}
-                      onChange={e => setAssignForm({ ...assignForm, departmentId: e.target.value })}
-                    >
-                      <option value="">Select department...</option>
-                      {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
-                    </select>
-                    <input
-                      style={{ ...s.select, marginBottom:"12px" }}
-                      type="date"
-                      value={assignForm.dueDate}
-                      onChange={e => setAssignForm({ ...assignForm, dueDate: e.target.value })}
-                    />
-                    <button
-                      style={s.actionBtn}
-                      onClick={assignComplaint}
-                      disabled={!assignForm.departmentId || updating}
-                    >
-                      {updating ? "Assigning..." : "Assign Now"}
-                    </button>
-                  </div>
-                )}
+                {user?.role==="admin" && (
+<>
+  {/* Assign Department */}
+  <button style={s.toggle} onClick={() => setPanel(panel === "assign" ? null : "assign")}>
+    {panel === "assign" ? "▼" : "►"} Assign Department
+  </button>
+
+  {panel === "assign" && (
+    <div style={s.panelBox}>
+      <select
+        style={s.select}
+        value={assignForm.departmentId}
+        onChange={e => setAssignForm({ ...assignForm, departmentId: e.target.value })}
+      >
+        <option value="">Select department...</option>
+        {departments.map(d=>(
+          <option key={d._id} value={d._id}>
+            {d.name}
+          </option>
+        ))}
+      </select>
+
+      <input
+        style={{ ...s.select, marginBottom:"12px" }}
+        type="date"
+        value={assignForm.dueDate}
+        onChange={e=>setAssignForm({...assignForm,dueDate:e.target.value})}
+      />
+
+      <button
+        style={s.actionBtn}
+        onClick={assignComplaint}
+        disabled={!assignForm.departmentId || updating}
+      >
+        {updating ? "Assigning..." : "Assign Now"}
+      </button>
+    </div>
+  )}
+</>
+)}
               </div>
             )}
           </div>

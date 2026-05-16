@@ -1,7 +1,7 @@
 const Complaint = require("../models/complaint");
 
 // @POST /api/complaints  — Citizen files a complaint
-exports.createComplaint = async (req, res, next) => {
+exports.createComplaint = async (req, res) => {
   try {
     const { title, description, category, priority, location } = req.body;
     const images = req.files ? req.files.map((f) => f.path) : [];
@@ -14,17 +14,20 @@ exports.createComplaint = async (req, res, next) => {
     });
 
     res.status(201).json({ success: true, complaint });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @GET /api/complaints  — Citizen sees own; staff/admin sees all
-exports.getComplaints = async (req, res, next) => {
+exports.getComplaints = async (req, res) => {
   try {
     const { status, category, priority, page = 1, limit = 10 } = req.query;
     const query = {};
 
     if (req.user.role === "citizen") query.citizen = req.user._id;
     if (req.user.role === "staff") query.assignedTo = req.user._id;
+    if (req.user.role === "dept_admin") query.department = req.user.department;
     if (status) query.status = status;
     if (category) query.category = category;
     if (priority) query.priority = priority;
@@ -39,11 +42,13 @@ exports.getComplaints = async (req, res, next) => {
       .limit(Number(limit));
 
     res.json({ success: true, total, page: Number(page), complaints });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @GET /api/complaints/:id
-exports.getComplaintById = async (req, res, next) => {
+exports.getComplaintById = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id)
       .populate("citizen", "name email phone")
@@ -58,11 +63,13 @@ exports.getComplaintById = async (req, res, next) => {
       return res.status(403).json({ message: "Access denied" });
 
     res.json({ success: true, complaint });
-  } catch (err) { next(err); }
+  }catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @PUT /api/complaints/:id/status  — Staff/Admin update status
-exports.updateStatus = async (req, res, next) => {
+exports.updateStatus = async (req, res) => {
   try {
     const { status, comment } = req.body;
     const complaint = await Complaint.findById(req.params.id);
@@ -74,14 +81,24 @@ exports.updateStatus = async (req, res, next) => {
 
     await complaint.save();
     res.json({ success: true, complaint });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @PUT /api/complaints/:id/assign  — Admin assigns to dept and staff
-exports.assignComplaint = async (req, res, next) => {
+exports.assignComplaint = async (req, res) => {
   try {
     const { departmentId, staffId, dueDate } = req.body;
     const complaint = await Complaint.findById(req.params.id);
+    if(
+req.user.role === "dept_admin" &&
+departmentId !== req.user.department.toString()
+){
+return res.status(403).json({
+message:"You can assign only within your department"
+});
+}
     if (!complaint) return res.status(404).json({ message: "Complaint not found" });
 
     complaint.department = departmentId;
@@ -96,11 +113,13 @@ exports.assignComplaint = async (req, res, next) => {
 
     await complaint.save();
     res.json({ success: true, complaint });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @POST /api/complaints/:id/feedback  — Citizen submits feedback after resolution
-exports.submitFeedback = async (req, res, next) => {
+exports.submitFeedback = async (req, res) => {
   try {
     const { rating, comment } = req.body;
     const complaint = await Complaint.findById(req.params.id);
@@ -116,11 +135,13 @@ exports.submitFeedback = async (req, res, next) => {
     await complaint.save();
 
     res.json({ success: true, message: "Feedback submitted", complaint });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @DELETE /api/complaints/:id  — Citizen deletes own pending complaint
-exports.deleteComplaint = async (req, res, next) => {
+exports.deleteComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
     if (!complaint) return res.status(404).json({ message: "Complaint not found" });
@@ -132,10 +153,12 @@ exports.deleteComplaint = async (req, res, next) => {
 
     await complaint.deleteOne();
     res.json({ success: true, message: "Complaint deleted" });
-  } catch (err) { next(err); }
+  } catch (err) {
+  res.status(500).json({ message: err.message });
+}
 };
 // @DELETE /api/complaints/:id  — Citizen deletes own pending complaint
-exports.deleteComplaint = async (req, res, next) => {
+exports.deleteComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
 
@@ -157,12 +180,12 @@ exports.deleteComplaint = async (req, res, next) => {
 
     res.json({ success: true, message: "Complaint deleted successfully" });
   } catch (err) {
-    next(err);
-  }
+  res.status(500).json({ message: err.message });
+}
 };
 
 // @DELETE /api/complaints/admin/:id  — Admin force deletes any complaint
-exports.adminDeleteComplaint = async (req, res, next) => {
+exports.adminDeleteComplaint = async (req, res) => {
   try {
     const complaint = await Complaint.findById(req.params.id);
 
@@ -174,6 +197,6 @@ exports.adminDeleteComplaint = async (req, res, next) => {
 
     res.json({ success: true, message: "Complaint permanently deleted by admin" });
   } catch (err) {
-    next(err);
-  }
+  res.status(500).json({ message: err.message });
+}
 };

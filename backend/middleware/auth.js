@@ -23,3 +23,24 @@ exports.authorize = (...roles) => (req, res, next) => {
   }
   next();
 };
+
+exports.authorizeDeptAdmin = async (req, res, next) => {
+
+  if (req.user.role === "admin") {
+      return next();
+  }
+
+  if (req.user.role !== "dept_admin") {
+      return res.status(403).json({
+         message:"Access denied"
+      });
+  }
+
+  if (!req.user.department) {
+      return res.status(403).json({
+         message:"No department assigned"
+      });
+  }
+
+  next();
+};

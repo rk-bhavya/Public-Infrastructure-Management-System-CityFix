@@ -6,7 +6,7 @@ import { StatusBadge, PriorityBadge } from "../components/StatusBadge";
 import { CATEGORY_ICONS } from "../components/categoryIcons";
 
 export default function AdminDashboard({ onViewComplaint }) {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
   const [complaints, setComplaints] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -14,18 +14,43 @@ export default function AdminDashboard({ onViewComplaint }) {
   const [tab, setTab] = useState("overview");
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const [s, c, d] = await Promise.all([
-          api("/admin/dashboard", "GET", null, token),
+        const [s, c, d, u] = await Promise.all([
+          api(
+            user?.role==="dept_admin"
+            ? "/complaints"
+            : "/admin/dashboard",
+            "GET",
+            null,
+            token
+          ),
           api("/complaints", "GET", null, token),
           api("/departments", "GET", null, token),
+          user?.role==="admin"
+ ? api("/admin/users","GET",null,token)
+ : Promise.resolve({users:[]}),
         ]);
-        setStats(s.stats);
+        if(user?.role==="dept_admin"){
+          setStats({
+            totalComplaints:c.complaints?.length || 0,
+            pending:c.complaints?.filter(x=>x.status==="pending").length || 0,
+            assigned:c.complaints?.filter(x=>x.status==="assigned").length || 0,
+            inProgress:c.complaints?.filter(x=>x.status==="in-progress").length || 0,
+            resolved:c.complaints?.filter(x=>x.status==="resolved").length || 0,
+            rejected:c.complaints?.filter(x=>x.status==="rejected").length || 0,
+            totalUsers:0,
+            totalStaff:0
+          });
+        }else{
+          setStats(s.stats);
+        }
         setComplaints(c.complaints || []);
         setDepartments(d.departments || []);
+        setUsers(u.users || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -33,7 +58,7 @@ export default function AdminDashboard({ onViewComplaint }) {
       }
     };
     loadAll();
-  }, [token]);
+  }, [token, user]);
 
   const filtered = complaints
     .filter(c => filter === "all" || c.status === filter)
@@ -96,13 +121,29 @@ export default function AdminDashboard({ onViewComplaint }) {
         )}
 
         {/* Tabs */}
-        <div style={s.tabs}>
-          {[["overview","📊 Overview"],["complaints","📋 Complaints"],["departments","🏛️ Departments"]].map(([t, l]) => (
-            <button key={t} style={{ ...s.tab, ...(tab === t ? s.tabActive : {}) }} onClick={() => setTab(t)}>
-              {l}
-            </button>
-          ))}
-        </div>
+<div style={s.tabs}>
+{[
+ ...(user?.role==="admin"
+   ? [
+      ["overview","📊 Overview"],
+      ["complaints","📋 Complaints"],
+      ["departments","🏛️ Departments"],
+      ["admins","👤 Admins"]
+     ]
+   : [
+      ["overview","📊 Overview"],
+      ["complaints","📋 Complaints"]
+     ])
+].map(([t,l]) => (
+<button
+ key={t}
+ style={{...s.tab,...(tab===t ? s.tabActive : {})}}
+ onClick={()=>setTab(t)}
+>
+ {l}
+</button>
+))}
+</div>
 
         {/* Overview Tab */}
         {tab === "overview" && (
@@ -212,6 +253,53 @@ export default function AdminDashboard({ onViewComplaint }) {
             ))}
           </div>
         )}
+
+        {/* Admins Tab */}
+{tab === "admins" && user?.role === "admin" && (
+  <div style={s.table}>
+
+    <div style={{
+display:"grid",
+gridTemplateColumns:"1fr 1.5fr 1fr 1.5fr 1fr",
+gap:"12px",
+padding:"12px 20px",
+background:"rgba(255,255,255,0.04)"
+}}>
+      <span>Name</span>
+      <span>Email</span>
+      <span>Role</span>
+      <span>Department</span>
+      <span>Status</span>
+    </div>
+
+    {users
+      .filter(u => u.role === "dept_admin")
+      .map(u => (
+        <div
+ key={u._id}
+ style={{
+ display:"grid",
+ gridTemplateColumns:"1fr 1.5fr 1fr 1.5fr 1fr",
+ gap:"12px",
+ padding:"14px 20px",
+ borderTop:"1px solid rgba(255,255,255,0.04)"
+}}
+>
+          <span style={s.cell}>{u.name}</span>
+          <span style={s.cell}>{u.email}</span>
+          <span style={s.cell}>{u.role}</span>
+          <span style={s.cell}>
+            {u.department?.name || "Not Assigned"}
+          </span>
+          <span style={s.cell}>
+            {u.isActive ? "🟢 Active" : "🔴 Inactive"}
+          </span>
+        </div>
+      ))
+    }
+
+  </div>
+)}
 
       </div>
     </div>
