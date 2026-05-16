@@ -8,7 +8,7 @@ The project implements a hierarchical role-based management system
 🛡️ Super Admin can monitor all complaints, assign complaints to departments, and manage department administrators.
 🏢 Department Admins can view complaints related to their department, update complaint status, add resolution notes, and mark complaints as resolved.
 
-🛠️ Technologies Used
+**🛠️ Technologies Used**
 
 🎨 Frontend |
   React.js,
@@ -28,3 +28,7 @@ The project implements a hierarchical role-based management system
 🔐 Authentication |
    JWT Authentication &
    bcryptjs
+
+**🎯 Purpose**
+
+The project aims to digitize and simplify civic complaint management while ensuring efficient coordination between municipal departments and citizens through a centralized online platform.
