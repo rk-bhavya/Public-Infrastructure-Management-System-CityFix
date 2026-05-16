@@ -7,6 +7,7 @@ The project implements a hierarchical role-based management system
 🏢 Department Admins can view complaints related to their department, update complaint status, add resolution notes, and mark complaints as resolved.
 
 🛠️ Technologies Used
+
 🎨 Frontend
   ⚛️ React.js
   🌐 Context API
