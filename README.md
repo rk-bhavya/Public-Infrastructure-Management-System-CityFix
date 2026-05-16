@@ -3,6 +3,7 @@ A full-stack MERN application developed to streamline the process of registering
 
 The project implements a hierarchical role-based management system
 
+
 👨‍💼 Citizens can register complaints, track complaint status, and provide feedback.
 🛡️ Super Admin can monitor all complaints, assign complaints to departments, and manage department administrators.
 🏢 Department Admins can view complaints related to their department, update complaint status, add resolution notes, and mark complaints as resolved.
